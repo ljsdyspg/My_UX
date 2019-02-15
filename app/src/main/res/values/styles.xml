@@ -1,0 +1,14 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:background">@color/black</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="MapTheme" parent="@style/Base.Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorAccent">@color/blue</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+</resources>
