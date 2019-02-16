@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.mission.waypoint.Waypoint;
+import dji.common.mission.waypoint.WaypointAction;
+import dji.common.mission.waypoint.WaypointActionType;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
 import dji.common.mission.waypoint.WaypointMissionExecutionEvent;
@@ -67,7 +70,6 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
     private Button btn_config_add;
     private Button btn_config_advanced;
     private Button btn_config_clear;
-    private Button btn_config_default;
     private Button btn_config_finish;
     private Button btn_config_locate;
 
@@ -123,13 +125,11 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
         btn_config_add = findViewById(R.id.btn_config_add);
         btn_config_advanced = findViewById(R.id.btn_config_advanced);
         btn_config_clear = findViewById(R.id.btn_config_clear);
-        btn_config_default = findViewById(R.id.btn_config_default);
         btn_config_finish = findViewById(R.id.btn_config_finish);
 
         btn_config_add.setOnClickListener(this);
         btn_config_advanced.setOnClickListener(this);
         btn_config_clear.setOnClickListener(this);
-        btn_config_default.setOnClickListener(this);
         btn_config_finish.setOnClickListener(this);
         btn_config_locate.setOnClickListener(this);
     }
@@ -182,10 +182,6 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
                 waypointMissionBuilder.waypointList(waypointList);
                 updateDroneLocation();//然后再把飞机的位置显示出来
                 break;
-            case R.id.btn_config_default:
-                // 默认配置
-
-                break;
             case R.id.btn_config_advanced:
                 // 高级配置
                 showSettingDialog();
@@ -215,25 +211,44 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
     private void showSettingDialog(){
         View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
 
-
-        final TextView wpAltitude_TV = (TextView) wayPointSettings.findViewById(R.id.altitude);
-        RadioGroup speed_RG = (RadioGroup) wayPointSettings.findViewById(R.id.speed);
         RadioGroup actionAfterFinished_RG = (RadioGroup) wayPointSettings.findViewById(R.id.actionAfterFinished);
         RadioGroup heading_RG = (RadioGroup) wayPointSettings.findViewById(R.id.heading);
-        //设置三档速度
-        speed_RG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
-
+        final TextView txt_height = (TextView) wayPointSettings.findViewById(R.id.txt_altitude);
+        final SeekBar skb_altitude = wayPointSettings.findViewById(R.id.skb_altitude);
+        final SeekBar skb_speed = wayPointSettings.findViewById(R.id.skb_speed);
+        final TextView txt_speed = wayPointSettings.findViewById(R.id.txt_speed);
+        skb_altitude.setMax(1000);
+        skb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.lowSpeed){
-                    mSpeed = 0.2f;
-                } else if (checkedId == R.id.MidSpeed){
-                    mSpeed = 1.0f;
-                } else if (checkedId == R.id.HighSpeed){
-                    mSpeed = 5.0f;
-                }
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txt_height.setText((float)i / 10 + " 米");
             }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        skb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txt_speed.setText((float)i / 10 + " 米/秒");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
         });
 
         actionAfterFinished_RG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -271,8 +286,8 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
                 .setView(wayPointSettings)
                 .setPositiveButton("Finish",new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id) {
-                        String altitudeString = wpAltitude_TV.getText().toString();
-                        altitude = Integer.parseInt(nulltoIntegerDefalt(altitudeString));
+                        altitude = (float) skb_altitude.getProgress() / 10 ;
+                        mSpeed = (float) skb_speed.getProgress() / 10;
                         configWayPointMission();
                     }
                 })
@@ -392,12 +407,15 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
             drawLine(point);
             double []coord = GCJ2WG(point.latitude,point.longitude);
             Waypoint mWaypoint = new Waypoint(coord[0], coord[1], altitude);
+            mWaypoint.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH,-90));
+            mWaypoint.addAction(new WaypointAction(WaypointActionType.STAY,2000));
+            mWaypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,3000));
+
             //Add Waypoints to Waypoint arraylist;
             if (waypointMissionBuilder != null) {
                 waypointList.add(mWaypoint);
                 waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
-            }else
-            {
+            }else {
                 waypointMissionBuilder = new WaypointMission.Builder();
                 waypointList.add(mWaypoint);
                 waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
@@ -524,6 +542,13 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
                 }
             }
         });
+    }
+
+    /**
+     * 每一个拍照点进行拍照作业
+     */
+    private void takePhotoAtPoint(){
+
     }
 
     private MApplication getMApplication(){

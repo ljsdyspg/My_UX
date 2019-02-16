@@ -31,15 +31,14 @@
                 android:layout_height="wrap_content"
                 android:text="高度:"/>
 
-            <EditText
-                android:id="@+id/altitude"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"></EditText>
-
+            <SeekBar
+                android:id="@+id/skb_altitude"
+                android:layout_width="259dp"
+                android:layout_height="wrap_content" />
             <TextView
+                android:id="@+id/txt_altitude"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="米" />
+                android:layout_height="match_parent" />
         </LinearLayout>
 
         <LinearLayout
@@ -52,33 +51,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="速度:"></TextView>
+                android:text="速度:"/>
 
-            <RadioGroup
-                android:id="@+id/speed"
+            <SeekBar
+                android:id="@+id/skb_speed"
+                android:layout_width="259dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/txt_speed"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/lowSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0.2m/s" />
-
-                <RadioButton
-                    android:id="@+id/MidSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1m/s" />
-
-                <RadioButton
-                    android:id="@+id/HighSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5m/s" />
-            </RadioGroup>
+                android:layout_height="match_parent" />
         </LinearLayout>
 
         <LinearLayout

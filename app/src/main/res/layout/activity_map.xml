@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".MapActivity">
+
+    <com.amap.api.maps2d.MapView
+        android:id="@+id/mapview_map"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="8"></com.amap.api.maps2d.MapView>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/btn_map_locate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="定位" />
+            <Button
+                android:id="@+id/btn_map_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清除" />
+
+            <Button
+                android:id="@+id/btn_map_plan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="规划路径" />
+
+            <Button
+                android:id="@+id/btn_map_config"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="配置" />
+
+            <Button
+                android:id="@+id/btn_map_finish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="提交" />
+
+            <TextView
+                android:id="@+id/txt_map_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+        </LinearLayout>
+    </ScrollView>
+
+
+</LinearLayout>

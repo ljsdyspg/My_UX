@@ -34,15 +34,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"/>
         <Button
-            android:id="@+id/btn_config_default"
-            android:text="简化配置"
-            android:textColor="@color/black"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"/>
-        <Button
             android:id="@+id/btn_config_advanced"
-            android:text="高级配置"
+            android:text="配置"
             android:textColor="@color/black"
             android:layout_weight="1"
             android:layout_width="0dp"

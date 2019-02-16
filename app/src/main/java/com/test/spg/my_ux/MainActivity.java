@@ -12,8 +12,12 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.amap.api.maps2d.AMap;
@@ -59,13 +63,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private MapView mapView;
     private AMap aMap;
     private Button btn_locate;
-    private Button btn_restart;
     private Button btn_pause;
     private Button btn_reset;
     private Button btn_resume;
     private Button btn_start;
     private Button btn_stop;
     private Button btn_config;
+    private PopupMenu popup;
+
     public static WaypointMission.Builder waypointMissionBuilder;
     private WaypointMissionOperator instance;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
@@ -150,7 +155,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         btn_locate = findViewById(R.id.btn_locate);
         btn_pause = findViewById(R.id.btn_pause);
-        btn_restart = findViewById(R.id.btn_restart);
         btn_reset = findViewById(R.id.btn_reset);
         btn_resume = findViewById(R.id.btn_resume);
         btn_start = findViewById(R.id.btn_start);
@@ -159,7 +163,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         btn_locate.setOnClickListener(this);
         btn_pause.setOnClickListener(this);
-        btn_restart.setOnClickListener(this);
         btn_reset.setOnClickListener(this);
         btn_resume.setOnClickListener(this);
         btn_start.setOnClickListener(this);
@@ -223,19 +226,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 mapPointList = null;
                 clear();
                 break;
-            case R.id.btn_restart:
-                // 重新开始任务
-                // 现在觉得没有什么用了
-                break;
             case R.id.btn_config:
-                // 配置任务信息
-                Intent intent = new Intent(this, ConfigActivity.class);
-                startActivityForResult(intent,1);
+                PopupMenu popup = new PopupMenu(this, view);
+                Menu popupMenu = popup.getMenu();
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.select_menu, popupMenu);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()){
+                            default:
+                                break;
+                            case R.id.action_1:
+                                startActivity(new Intent(MainActivity.this,ConfigActivity.class));
+                                break;
+                            case R.id.action_2:
+                                startActivity(new Intent(MainActivity.this,MapActivity.class));
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popup.show();
                 break;
             default:
                 break;
         }
     }
+
+
     private void clear(){
         runOnUiThread(new Runnable() {
             @Override

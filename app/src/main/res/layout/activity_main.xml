@@ -137,11 +137,7 @@
                     android:text="继续"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"/>
-                <Button
-                    android:id="@+id/btn_restart"
-                    android:text="重开"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"/>
+
                 <Button
                     android:id="@+id/btn_reset"
                     android:text="重置"
