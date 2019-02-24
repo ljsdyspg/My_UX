@@ -58,7 +58,11 @@
         <activity
             android:name=".LoginActivity"
             android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
@@ -87,11 +91,7 @@
             android:name=".MainActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ConfigActivity"
@@ -100,9 +100,8 @@
         <activity android:name=".GetLocation" />
         <activity android:name=".TestActivity" />
         <activity android:name=".MapActivity"
-            android:screenOrientation="landscape">
-
-        </activity>
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar.Fullscreen" />
     </application>
 
 </manifest>

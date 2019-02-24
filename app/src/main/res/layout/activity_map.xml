@@ -22,16 +22,24 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
             <Button
                 android:id="@+id/btn_map_locate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="定位" />
+
             <Button
                 android:id="@+id/btn_map_clear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="清除" />
+
+            <Button
+                android:id="@+id/btn_map_scale"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="比例"/>
 
             <Button
                 android:id="@+id/btn_map_plan"

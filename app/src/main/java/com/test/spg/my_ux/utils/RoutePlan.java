@@ -6,6 +6,13 @@ import java.util.Comparator;
 import java.util.List;
 
 public class RoutePlan {
+
+    // 每变化10米，经纬度变化的度数，这里需要优化，不准确
+    public static double dt_lng_10 = 0.0001169619;
+    public static double dt_lat_10 = 0.0000898093;
+    public static double dt_lng = 0.0001169619;
+    public static double dt_lat = 0.0000898093;
+
     public static List<myPoint> getAllPoints(myPoint... points) {
         double lat_min = points[0].lat;
         double lat_max = points[0].lat;
@@ -27,11 +34,6 @@ public class RoutePlan {
 
         // 相对左下的点为起始点
         myPoint p0 = new myPoint(lng_min, temp_lat);
-        myPoint p1 = null;
-
-        // 每变化10米，经纬度变化的度数，这里需要优化，不准确
-        double dt_lng = 0.0001169619;
-        double dt_lat = 0.0000898093;
 
         // 最终所有的坐标点存储
         List<myPoint> out_points = new ArrayList<>();
@@ -55,6 +57,15 @@ public class RoutePlan {
             if ((temp_point.lat < points[points.length - 1].lat) != (temp_point.lat < points[0].lat) && !temp_point.isEmpty()) {
                 nodes.add(temp_point);
             }
+
+            nodes.sort(new Comparator<myPoint>() {
+                @Override
+                public int compare(myPoint o1, myPoint o2) {
+                    if (o1.lat > o2.lat) return 1;
+                    else if (o1.lat < o2.lat) return -1;
+                    else return 0;
+                }
+            });
 
             double node_lat_max = nodes.get(0).lat;
             double node_lat_min = nodes.get(0).lat;

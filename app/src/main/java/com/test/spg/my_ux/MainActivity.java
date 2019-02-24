@@ -16,8 +16,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.amap.api.maps2d.AMap;
@@ -58,6 +60,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private double droneLocationLat = 181, droneLocationLng = 181;//181超出180的范围，所以设置该初值
     private Marker droneMarker = null;//表示飞机位置的标记对象
     private List<LatLng> mapPointList = new ArrayList<>();//存储地图上的点，用来画线
+    private ViewGroup parentView;// 最外层RelativeLayout
 
     private FPVWidget fpvWidget;
     private MapView mapView;
@@ -69,6 +72,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button btn_start;
     private Button btn_stop;
     private Button btn_config;
+    private Button btn_flush;
     private PopupMenu popup;
 
     public static WaypointMission.Builder waypointMissionBuilder;
@@ -153,6 +157,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private void init(){
 
+        parentView = findViewById(R.id.root_view);
         btn_locate = findViewById(R.id.btn_locate);
         btn_pause = findViewById(R.id.btn_pause);
         btn_reset = findViewById(R.id.btn_reset);
@@ -160,6 +165,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_start = findViewById(R.id.btn_start);
         btn_stop = findViewById(R.id.btn_stop);
         btn_config = findViewById(R.id.btn_config);
+        btn_flush = findViewById(R.id.btn_flush);
 
         btn_locate.setOnClickListener(this);
         btn_pause.setOnClickListener(this);
@@ -168,8 +174,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_start.setOnClickListener(this);
         btn_stop.setOnClickListener(this);
         btn_config.setOnClickListener(this);
+        btn_flush.setOnClickListener(this);
 
         fpvWidget = findViewById(R.id.fpv_widget);
+        fpvWidget.getVideoSource();
         fpvWidget.setSourceCameraNameVisibility(false); // 把FPV上的版本名字关掉
     }
 
@@ -225,6 +233,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 // 重置
                 mapPointList = null;
                 clear();
+                Toast.makeText(this, "重置完成", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.btn_config:
                 PopupMenu popup = new PopupMenu(this, view);
@@ -248,6 +257,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     }
                 });
                 popup.show();
+                break;
+            case R.id.btn_flush:
+                parentView.removeView(fpvWidget);
+                parentView.addView(fpvWidget, 0);
+                //fpvWidget.getVideoSource();
+                Toast.makeText(this, "刷新FPV", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;

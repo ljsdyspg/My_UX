@@ -60,6 +60,7 @@ import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
+import okhttp3.Route;
 
 public class MapActivity extends Activity implements AMap.OnMapClickListener, View.OnClickListener , AMap.OnMarkerDragListener{
 
@@ -72,6 +73,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     private Button btn_map_plan;
     private Button btn_map_config;
     private Button btn_map_finish;
+    private Button btn_map_scale;
 
     private List<Waypoint> waypointList = new ArrayList<>();//存储路径，Wayponit三个参数，经纬高
     private List<LatLng> points = new ArrayList<>();
@@ -123,7 +125,6 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
 
         initUI();
-        initPoint();
         // printPolygon();
         //calculateLength();
     }
@@ -170,6 +171,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         btn_map_config = findViewById(R.id.btn_map_config);
         btn_map_finish = findViewById(R.id.btn_map_finish);
         btn_map_locate = findViewById(R.id.btn_map_locate);
+        btn_map_scale = findViewById(R.id.btn_map_scale);
+        btn_map_scale.setOnClickListener(this);
         btn_map_plan.setOnClickListener(this);
         btn_map_clear.setOnClickListener(this);
         btn_map_config.setOnClickListener(this);
@@ -261,6 +264,49 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         converter.coord(latLng);
         return converter.convert();
     }
+
+    double scale = 1;
+    int gap = 10;
+    private void showScaleDialog(){
+        View scaleSettings = getLayoutInflater().inflate(R.layout.dialog_scale, null);
+
+        SeekBar skb_scale = scaleSettings.findViewById(R.id.dialog_scale_seekBar);
+        final TextView txt_scale = scaleSettings.findViewById(R.id.dialog_scale_txt);
+
+        final String interval = "路径点之间的距离: ";
+        skb_scale.setMax(190);
+        skb_scale.setProgress(gap-10);
+        skb_scale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txt_scale.setText(interval + (i+10) + "m");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                scale = (seekBar.getProgress() + 10) / 10;
+                gap = seekBar.getProgress()+10;
+            }
+        });
+        new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT)
+                .setTitle("")
+                .setView(scaleSettings)
+                .setPositiveButton("Finish",new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id) {
+                        RoutePlan.dt_lng = RoutePlan.dt_lng_10 * scale;
+                        RoutePlan.dt_lat = RoutePlan.dt_lat_10 * scale;
+                        Toast.makeText(MapActivity.this, interval+gap+"m", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .create()
+                .show();
+    }
+
     //该方法显示设置对话框 高度、速度、任务完成后的行为、朝向？
     private void showSettingDialog(){
         View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
@@ -427,6 +473,10 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 clear_map();
                 mMarkers.clear();
                 break;
+            case R.id.btn_map_scale:
+                // 设置比例，调整规划路径点之间的距离
+                showScaleDialog();
+                break;
             case R.id.btn_map_plan:
                 // 根据当前图形进行规划
                 routePlan();
@@ -435,6 +485,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                     Toast.makeText(this, "路径超过99个，需要重新规划！", Toast.LENGTH_LONG).show();
                     clear_map();
                     mMarkers.clear();
+                } else if (points.size()==0){
+                    Toast.makeText(this, "间距过大，需要重新调整！", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.btn_map_config:
@@ -482,13 +534,6 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 .strokeColor(Color.argb(90,0x00,0xE6,0x76)) // 边框颜色
                 .fillColor(Color.argb(50, 1, 1, 1));   // 多边形的填充色
         polygon = aMap.addPolygon(polygonOptions);
-    }
-
-    private void initPoint() {
-        points.add(new LatLng(30.5272665493,114.3608650615));// 30.5272665493,114.3608650615
-        points.add(new LatLng(30.5282255024,114.3608650615));// 30.5282255024,114.3608522415
-        points.add(new LatLng(30.5272412676,114.3616032600));
-        points.add(new LatLng(30.5272274051,114.3608468771));
     }
 
     private void calculateLength(){
@@ -585,6 +630,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             }
             List<myPoint> myPoints = RoutePlan.getAllPoints(list);
             points.clear();
+            waypointList.clear();
             for (myPoint point : myPoints) {
                 points.add(new LatLng(point.lat,point.lng));
 
@@ -603,6 +649,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                     waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
                 }
             }
+            Toast.makeText(this, "count: "+waypointList.size(), Toast.LENGTH_SHORT).show();
             txt_map_tv.setText("points:" + points.size());
             drawPoint(points);
             drawLine(points);

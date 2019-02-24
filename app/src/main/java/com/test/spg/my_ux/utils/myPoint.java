@@ -10,6 +10,6 @@ public class myPoint {
     }
 
     boolean isEmpty() {
-        return this.lat == 0 || this.lng == 0;
+        return !(this.lat > -90 && this.lat < 90 && this.lng > -180 && this.lng < 180) && (this.lat != 0f && this.lng != 0f);
     }
 }
