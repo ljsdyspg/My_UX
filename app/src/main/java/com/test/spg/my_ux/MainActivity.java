@@ -73,9 +73,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button btn_stop;
     private Button btn_config;
     private Button btn_flush;
-    private PopupMenu popup;
 
-    public static WaypointMission.Builder waypointMissionBuilder;
+
     private WaypointMissionOperator instance;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private FlightController mFlightController;
@@ -280,11 +279,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         updateDroneLocation();
         cameraUpdate();
     }
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        waypointMissionBuilder = data.getParcelableExtra("myWaypointMissionBuilder");
-        Toast.makeText(this, waypointMissionBuilder.getWaypointCount(), Toast.LENGTH_LONG).show();
-    }*/
 
     //更新飞机的位置信息
     private void updateDroneLocation(){
@@ -371,27 +365,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    //这里再次登录账号
-    private void loginAccount(){
-        Toast.makeText(this, "登録！", Toast.LENGTH_SHORT).show();
-        UserAccountManager.getInstance().logIntoDJIUserAccount(this,
-                new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
-                    @Override
-                    public void onSuccess(final UserAccountState userAccountState) {
-                        Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
-                    }
-                    @Override
-                    public void onFailure(DJIError error) {
-                        Toast.makeText(MainActivity.this, "Fail!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
     public WaypointMissionOperator getWaypointMissionOperator() {
         if (instance == null) {
             instance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
         }
         return instance;
     }
+
     private void setResultToToast(final String string){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override

@@ -32,15 +32,13 @@ import com.amap.api.maps2d.model.Polygon;
 import com.amap.api.maps2d.model.PolygonOptions;
 import com.amap.api.maps2d.model.Polyline;
 import com.amap.api.maps2d.model.PolylineOptions;
-import com.amap.api.maps2d.model.Text;
 import com.test.spg.my_ux.utils.BDToGPS;
+import com.test.spg.my_ux.utils.GS;
 import com.test.spg.my_ux.utils.RoutePlan;
 import com.test.spg.my_ux.utils.myPoint;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +58,6 @@ import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.waypoint.WaypointMissionOperator;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
-import okhttp3.Route;
 
 public class MapActivity extends Activity implements AMap.OnMapClickListener, View.OnClickListener , AMap.OnMarkerDragListener{
 
@@ -75,7 +72,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     private Button btn_map_finish;
     private Button btn_map_scale;
 
-    private List<Waypoint> waypointList = new ArrayList<>();//存储路径，Wayponit三个参数，经纬高
+    //存储路径，Wayponit三个参数，经纬高
+    private List<Waypoint> waypointList = new ArrayList<>();
     private List<LatLng> points = new ArrayList<>();
 
     List<Float> distances = new ArrayList<>();
@@ -104,6 +102,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     private List<Marker> pointMarker_list = new ArrayList<>();
     // 线
     private Polyline polyline;
+    private double overlap = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +124,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
 
         initUI();
+        updateDroneLocation();
         // printPolygon();
         //calculateLength();
     }
@@ -265,59 +265,16 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         return converter.convert();
     }
 
-    double scale = 1;
-    int gap = 10;
     private void showScaleDialog(){
         View scaleSettings = getLayoutInflater().inflate(R.layout.dialog_scale, null);
 
-        SeekBar skb_scale = scaleSettings.findViewById(R.id.dialog_scale_seekBar);
-        final TextView txt_scale = scaleSettings.findViewById(R.id.dialog_scale_txt);
+        final TextView txt_height = scaleSettings.findViewById(R.id.txt_altitude);
+        final SeekBar skb_altitude = scaleSettings.findViewById(R.id.skb_altitude);
+        final TextView txt_overlap = scaleSettings.findViewById(R.id.txt_overlap);
+        final SeekBar skb_overlap = scaleSettings.findViewById(R.id.skb_overlap);
 
-        final String interval = "路径点之间的距离: ";
-        skb_scale.setMax(190);
-        skb_scale.setProgress(gap-10);
-        skb_scale.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txt_scale.setText(interval + (i+10) + "m");
-            }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                scale = (seekBar.getProgress() + 10) / 10;
-                gap = seekBar.getProgress()+10;
-            }
-        });
-        new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT)
-                .setTitle("")
-                .setView(scaleSettings)
-                .setPositiveButton("Finish",new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int id) {
-                        RoutePlan.dt_lng = RoutePlan.dt_lng_10 * scale;
-                        RoutePlan.dt_lat = RoutePlan.dt_lat_10 * scale;
-                        Toast.makeText(MapActivity.this, interval+gap+"m", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .create()
-                .show();
-    }
-
-    //该方法显示设置对话框 高度、速度、任务完成后的行为、朝向？
-    private void showSettingDialog(){
-        View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
-
-        RadioGroup actionAfterFinished_RG = (RadioGroup) wayPointSettings.findViewById(R.id.actionAfterFinished);
-        RadioGroup heading_RG = (RadioGroup) wayPointSettings.findViewById(R.id.heading);
-        final TextView txt_height = (TextView) wayPointSettings.findViewById(R.id.txt_altitude);
-        final SeekBar skb_altitude = wayPointSettings.findViewById(R.id.skb_altitude);
-        final SeekBar skb_speed = wayPointSettings.findViewById(R.id.skb_speed);
-        final TextView txt_speed = wayPointSettings.findViewById(R.id.txt_speed);
-        skb_altitude.setMax(1000);
+        skb_altitude.setMax(3000);
         skb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -334,6 +291,49 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
             }
         });
+        skb_overlap.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txt_overlap.setText(i+"%");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT)
+                .setTitle("")
+                .setView(scaleSettings)
+                .setPositiveButton("Finish",new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id) {
+                        altitude = (float) skb_altitude.getProgress() / 10 ;
+                        overlap = skb_overlap.getProgress()/100 ;
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    //该方法显示设置对话框 高度、速度、任务完成后的行为、朝向？
+    private void showSettingDialog(){
+        View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
+
+        RadioGroup actionAfterFinished_RG = (RadioGroup) wayPointSettings.findViewById(R.id.actionAfterFinished);
+        RadioGroup heading_RG = (RadioGroup) wayPointSettings.findViewById(R.id.heading);
+
+
+        final TextView txt_speed = wayPointSettings.findViewById(R.id.txt_speed);
+        final SeekBar skb_speed = wayPointSettings.findViewById(R.id.skb_speed);
+
+
+
         skb_speed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -386,7 +386,6 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 .setView(wayPointSettings)
                 .setPositiveButton("Finish",new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id) {
-                        altitude = (float) skb_altitude.getProgress() / 10 ;
                         mSpeed = (float) skb_speed.getProgress() / 10;
                         configWayPointMission();
                     }
@@ -628,14 +627,40 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             for (int i = 0; i < list.length; i++) {
                 list[i] = new myPoint(points.get(i).latitude, points.get(i).longitude);
             }
+
+            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
+            System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);
+
+            System.out.println("altitude = " + altitude);
+            System.out.println("overlap = " + overlap);
+
+            //Log.d(TAG, "routePlan: altitude"+altitude);
+            //Log.d(TAG, "routePlan: overlap"+overlap);
+
+            RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude,overlap));
+            RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude,overlap));
+
+            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
+            System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);
+
+            Toast.makeText(this, "dt_lat,dt_lng: "+ RoutePlan.dt_lat+"\t"+ RoutePlan.dt_lat, Toast.LENGTH_SHORT).show();
+
             List<myPoint> myPoints = RoutePlan.getAllPoints(list);
             points.clear();
             waypointList.clear();
+
+            // 添加起飞点
+            LatLng start = WG2GCJ(new LatLng(droneLocationLat,droneLocationLng));
+            myPoints.add(0,new myPoint(start.latitude,start.longitude));
+
             for (myPoint point : myPoints) {
                 points.add(new LatLng(point.lat,point.lng));
 
                 double []coord = GCJ2WG(point.lat,point.lng);
                 Waypoint mWaypoint = new Waypoint(coord[0], coord[1], altitude);
+
+                // 确保每个点都朝向北方，然后保证云台竖直向下，拍照
+                mWaypoint.addAction(new WaypointAction(WaypointActionType.ROTATE_AIRCRAFT,0));
                 mWaypoint.addAction(new WaypointAction(WaypointActionType.GIMBAL_PITCH,-90));
                 mWaypoint.addAction(new WaypointAction(WaypointActionType.STAY,2000));
                 mWaypoint.addAction(new WaypointAction(WaypointActionType.START_TAKE_PHOTO,3000));

@@ -31,6 +31,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     private static final String TAG = "LoginActivity";
     private static final String LAST_USED_BRIDGE_IP = "bridgeip";
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
+    // 程序是否启动
     private static boolean isAppStarted = false;
 
     private Button btn_login;
@@ -86,6 +87,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         }
     };
 
+    // 程序需要的所有控件
     private static final String[] REQUIRED_PERMISSION_LIST = new String[] {
             Manifest.permission.VIBRATE,
             Manifest.permission.INTERNET,
@@ -103,13 +105,16 @@ public class LoginActivity extends Activity implements View.OnClickListener{
             Manifest.permission.RECORD_AUDIO
     };
     private static final int REQUEST_PERMISSION_CODE = 12345;
+    // 保存未获取到的权限
     private List<String> missingPermission = new ArrayList<>();
-    private EditText bridgeModeEditText;
 
     public static boolean isStarted() {
         return isAppStarted;
     }
 
+    /**
+     *  初始化控件
+     */
     private void init(){
         btn_login = findViewById(R.id.btn_login);
         btn_jump = findViewById(R.id.btn_jump);
@@ -191,7 +196,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         }
     }
 
-    //这里再次登录账号
+    // 登录账号
     private void loginAccount(){
         UserAccountManager.getInstance().logIntoDJIUserAccount(this,
                 new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {

@@ -48,7 +48,7 @@
 
         <meta-data
             android:name="com.dji.sdk.API_KEY"
-            android:value="e210a1ab74a7e11e27e7b80e" />
+            android:value="be829d168702980669901c27" />
 
         <!-- 启用高德地图服务 -->
         <meta-data
@@ -89,6 +89,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" >
 

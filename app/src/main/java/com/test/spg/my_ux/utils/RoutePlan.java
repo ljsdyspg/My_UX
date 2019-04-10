@@ -8,12 +8,21 @@ import java.util.List;
 public class RoutePlan {
 
     // 每变化10米，经纬度变化的度数，这里需要优化，不准确
-    public static double dt_lng_10 = 0.0001169619;
-    public static double dt_lat_10 = 0.0000898093;
+    //public static double dt_lng_10 = 0.0001169619;
+    //public static double dt_lat_10 = 0.0000898093;
     public static double dt_lng = 0.0001169619;
     public static double dt_lat = 0.0000898093;
 
     public static List<myPoint> getAllPoints(myPoint... points) {
+
+        System.out.println("points = " + points.length);
+        System.out.println("p0.lat = " + points[0].lat);
+        System.out.println("p0.lng = " + points[0].lng);
+        System.out.println("p1.lat = " + points[1].lat);
+        System.out.println("p1.lng = " + points[1].lng);
+        System.out.println("p2.lat = " + points[2].lat);
+        System.out.println("p2.lng = " + points[2].lng);
+
         double lat_min = points[0].lat;
         double lat_max = points[0].lat;
         double lng_min = points[0].lng;
@@ -37,11 +46,16 @@ public class RoutePlan {
 
         // 最终所有的坐标点存储
         List<myPoint> out_points = new ArrayList<>();
-        out_points.add(p0);
+        // 添加起飞点
+        // out_points.add(p0);
 
         // 交点存储
         List<myPoint> nodes = new ArrayList<>();
         myPoint temp_point;
+
+        System.out.println("dt_lng = " + dt_lng);
+        System.out.println("dt_lat = " + dt_lat);
+
 
         for (double temp_lng = lng_min + dt_lng; temp_lng < lng_max; temp_lng += dt_lng) {
             //System.out.println(temp_lng);
@@ -67,14 +81,18 @@ public class RoutePlan {
                 }
             });
 
+            // 取得
             double node_lat_max = nodes.get(0).lat;
             double node_lat_min = nodes.get(0).lat;
             for (myPoint node : nodes) {
+                System.out.println(node.lat+", "+node.lng);
                 if (node_lat_max < node.lat) node_lat_max = node.lat;
                 if (node_lat_min > node.lat) node_lat_min = node.lat;
             }
-            out_points.add(nodes.get(0));
-            for (temp_lat = node_lat_min + dt_lat; temp_lat < node_lat_max; temp_lat += dt_lat) {
+
+            //out_points.add(nodes.get(0));
+            // 经度一定，纬度叠加，添加路径点
+            for (temp_lat = node_lat_min; temp_lat < node_lat_max; temp_lat += dt_lat) {
                 temp_point = new myPoint(temp_lat, temp_lng);
                 out_points.add(temp_point);
             }
@@ -86,6 +104,9 @@ public class RoutePlan {
             out_points.add(nodes.get(nodes.size() - 1));
         }
         out_points.remove(0);
+
+        System.out.println("out_points = " + out_points.size());
+
         out_points = rearrange((ArrayList<myPoint>) out_points);
         return  out_points;
     }
@@ -123,7 +144,7 @@ public class RoutePlan {
     }
 
 
-    public static List<myPoint> rearrange(ArrayList<myPoint> out_points){
+    public static List<myPoint> rearrange(ArrayList<myPoint> out_points) {
         boolean isOdd = false;
         myPoint temp = out_points.get(0);
         ArrayList<myPoint> outList = new ArrayList<>();
@@ -132,14 +153,14 @@ public class RoutePlan {
         for (myPoint point : out_points) {
             if (point.lng == temp.lng) {
                 columnList.add(point);
-            }else if (isOdd){
+            } else if (isOdd) {
                 Collections.reverse(columnList);
                 temp = point;
                 outList.addAll(columnList);
                 columnList.clear();
                 columnList.add(point);
                 isOdd = false;
-            }else {
+            } else {
                 temp = point;
                 outList.addAll(columnList);
                 columnList.clear();
@@ -148,5 +169,34 @@ public class RoutePlan {
             }
         }
         return outList;
+    }
+
+
+
+    public static void main(String[] args) { ;
+
+        /*myPoint p1 = new myPoint(30.5378740000,114.3672660000);
+        myPoint p2 = new myPoint(30.5348570000,114.3621280000);
+        myPoint p3 = new myPoint(30.5322280000,114.3690810000);*/
+        myPoint p1 = new myPoint(30.523683,114.355316);
+        myPoint p2 = new myPoint(30.524055,114.367919);
+        myPoint p3 = new myPoint(30.530233,114.359397);
+
+
+        dt_lng = GS.cal_DeltaLng(p1.lat, p1.lng, GS.cal_Length(100,0.1));
+        dt_lat = GS.cal_DeltaLat(p1.lat, p1.lng, GS.cal_Width(100,0.1));
+
+        System.out.println("dt_lng = " + dt_lng);
+        System.out.println("dt_lat = " + dt_lat);
+
+        List<myPoint> temp_list = getAllPoints(p1,p2,p3);
+
+        for (int i = 0; i < temp_list.size(); i++) {
+            String js = "\nvar marker = new BMap.Marker(new BMap.Point("+temp_list.get(i).lng+","+temp_list.get(i).lat+"));\n" +
+                    "map.addOverlay(marker);\n" +
+                    "var label = new BMap.Label("+i+",{offset:new BMap.Size(20,-10)});" +
+                    "marker.setLabel(label);";
+            System.out.println(js);
+        }
     }
 }

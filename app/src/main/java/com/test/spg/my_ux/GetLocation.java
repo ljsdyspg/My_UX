@@ -30,9 +30,9 @@ public class GetLocation extends Activity implements View.OnClickListener{
     private TextView LocInfo;
 
     private void initUI(){
-        getLoc = (Button) findViewById(R.id.GetLoc);
-        getMap = (Button) findViewById(R.id.ShowOnMap);
-        LocInfo = (TextView) findViewById(R.id.LocInf);
+        getLoc = findViewById(R.id.GetLoc);
+        getMap = findViewById(R.id.ShowOnMap);
+        LocInfo = findViewById(R.id.LocInf);
 
         getLoc.setOnClickListener(this);
         getMap.setOnClickListener(this);

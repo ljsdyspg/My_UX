@@ -209,14 +209,14 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
 
     //该方法显示设置对话框 高度、速度、任务完成后的行为、朝向？
     private void showSettingDialog(){
-        View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
+        View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting_origin, null);
 
-        RadioGroup actionAfterFinished_RG = (RadioGroup) wayPointSettings.findViewById(R.id.actionAfterFinished);
-        RadioGroup heading_RG = (RadioGroup) wayPointSettings.findViewById(R.id.heading);
-        final TextView txt_height = (TextView) wayPointSettings.findViewById(R.id.txt_altitude);
-        final SeekBar skb_altitude = wayPointSettings.findViewById(R.id.skb_altitude);
-        final SeekBar skb_speed = wayPointSettings.findViewById(R.id.skb_speed);
-        final TextView txt_speed = wayPointSettings.findViewById(R.id.txt_speed);
+        RadioGroup actionAfterFinished_RG = (RadioGroup) wayPointSettings.findViewById(R.id.origin_actionAfterFinished);
+        RadioGroup heading_RG = (RadioGroup) wayPointSettings.findViewById(R.id.origin_heading);
+        final TextView txt_height = (TextView) wayPointSettings.findViewById(R.id.origin_txt_altitude);
+        final SeekBar skb_altitude = wayPointSettings.findViewById(R.id.origin_skb_altitude);
+        final SeekBar skb_speed = wayPointSettings.findViewById(R.id.origin_skb_speed);
+        final TextView txt_speed = wayPointSettings.findViewById(R.id.origin_txt_speed);
         skb_altitude.setMax(1000);
         skb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -254,13 +254,13 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
         actionAfterFinished_RG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.finishNone){
+                if (checkedId == R.id.origin_finishNone){
                     mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
-                } else if (checkedId == R.id.finishGoHome){
+                } else if (checkedId == R.id.origin_finishGoHome){
                     mFinishedAction = WaypointMissionFinishedAction.GO_HOME;
-                } else if (checkedId == R.id.finishAutoLanding){
+                } else if (checkedId == R.id.origin_finishAutoLanding){
                     mFinishedAction = WaypointMissionFinishedAction.AUTO_LAND;
-                } else if (checkedId == R.id.finishToFirst){
+                } else if (checkedId == R.id.origin_finishToFirst){
                     mFinishedAction = WaypointMissionFinishedAction.GO_FIRST_WAYPOINT;
                 }
             }
@@ -269,13 +269,13 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
         heading_RG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.headingNext) {
+                if (checkedId == R.id.origin_headingNext) {
                     mHeadingMode = WaypointMissionHeadingMode.AUTO;
-                } else if (checkedId == R.id.headingInitDirec) {
+                } else if (checkedId == R.id.origin_headingInitDirec) {
                     mHeadingMode = WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
-                } else if (checkedId == R.id.headingRC) {
+                } else if (checkedId == R.id.origin_headingRC) {
                     mHeadingMode = WaypointMissionHeadingMode.CONTROL_BY_REMOTE_CONTROLLER;
-                } else if (checkedId == R.id.headingWP) {
+                } else if (checkedId == R.id.origin_headingWP) {
                     mHeadingMode = WaypointMissionHeadingMode.USING_WAYPOINT_HEADING;
                 }
             }
