@@ -98,8 +98,6 @@
             android:name=".ConfigActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.Light.NoActionBar.Fullscreen" />
-        <activity android:name=".GetLocation" />
-        <activity android:name=".TestActivity" />
         <activity android:name=".MapActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Material.Light.NoActionBar.Fullscreen" />

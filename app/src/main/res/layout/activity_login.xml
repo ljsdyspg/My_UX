@@ -8,19 +8,32 @@
     android:id="@+id/root_view"
     tools:context=".LoginActivity">
 
-    <Button
-        android:id="@+id/btn_login"
-        android:text="登录"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="222dp"
+        android:background="@color/background_blue"
+        android:layout_centerHorizontal="true"
+        android:text="路径规划飞行"
+        android:textSize="30dp" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="200dp"
+        android:text="登录" />
 
     <Button
         android:id="@+id/btn_jump"
-        android:text="跳转"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/btn_login"/>
+        android:layout_alignTop="@+id/btn_login"
+        android:layout_marginTop="80dp"
+        android:text="跳转" />
 
 </RelativeLayout>

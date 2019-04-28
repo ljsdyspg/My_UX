@@ -29,7 +29,6 @@ import dji.sdk.useraccount.UserAccountManager;
 
 public class LoginActivity extends Activity implements View.OnClickListener{
     private static final String TAG = "LoginActivity";
-    private static final String LAST_USED_BRIDGE_IP = "bridgeip";
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
     // 程序是否启动
     private static boolean isAppStarted = false;
@@ -163,6 +162,9 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         }
     }
 
+    /**
+     * 注册SDK
+     */
     private void startSDKRegistration() {
         if (isRegistrationInProgress.compareAndSet(false, true)) {
             AsyncTask.execute(new Runnable() {

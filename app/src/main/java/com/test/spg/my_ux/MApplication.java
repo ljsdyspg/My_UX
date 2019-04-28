@@ -2,8 +2,6 @@ package com.test.spg.my_ux;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
 
 import com.amap.api.maps2d.model.LatLng;
 import com.secneo.sdk.Helper;
@@ -11,8 +9,6 @@ import com.secneo.sdk.Helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import dji.sdk.base.BaseProduct;
-import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MApplication extends Application {
 

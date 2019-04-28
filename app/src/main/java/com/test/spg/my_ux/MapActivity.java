@@ -72,28 +72,29 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     private Button btn_map_finish;
     private Button btn_map_scale;
 
-    //存储路径，Wayponit三个参数，经纬高
+    // 存储路径点，Wayponit三个参数，经纬高
     private List<Waypoint> waypointList = new ArrayList<>();
+    // 路径点
     private List<LatLng> points = new ArrayList<>();
 
-    List<Float> distances = new ArrayList<>();
-    private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
+
+    private List<Marker> mMarkers = new ArrayList<>();
+
     public static WaypointMission.Builder waypointMissionBuilder;
     private FlightController mFlightController;
     private WaypointMissionOperator instance;
-    private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
-    private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.USING_INITIAL_DIRECTION;
+    private WaypointMissionFinishedAction mFinishedAction;
+    private WaypointMissionHeadingMode mHeadingMode;
     private double droneLocationLat = 181, droneLocationLng = 181;//181超出180的范围，所以设置该初值
     private Marker droneMarker = null;//表示飞机位置的标记对象
 
-    int max_index;
-    int min_index;
+    // 默认高度，速度，最大速度
     private float altitude = 100.0f;
     private float mSpeed = 10.0f;
     private float maxSpeed = 10.0f;
 
     private MarkerOptions markerOptions;
-    private PolygonOptions polygonOptions;
+
     // 多边形
     private Polygon polygon;
     // 点
@@ -116,17 +117,13 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
         mapView = findViewById(R.id.mapview_map);
         mapView.onCreate(savedInstanceState);
+
         aMap = mapView.getMap();
         aMap.setOnMapClickListener(this);
         aMap.setOnMarkerDragListener(this);
         aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(30.5275277595,114.3610882759), 18));
-        //addMarkersToMap();
-
 
         initUI();
-        updateDroneLocation();
-        // printPolygon();
-        //calculateLength();
     }
     /**
      * 方法必须重写
@@ -164,6 +161,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         mapView.onDestroy();
     }
 
+    /**
+     * 初始化界面
+     */
     private void initUI() {
         txt_map_tv = findViewById(R.id.txt_map_tv);
         btn_map_clear = findViewById(R.id.btn_map_clear);
@@ -185,15 +185,13 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            onProductConnectionChange();
+            initFlightController();
         }
     };
 
-    private void onProductConnectionChange()
-    {
-        initFlightController();
-    }
-
+    /**
+     * 初始化飞机控制，并获取飞机位置
+     */
     private void initFlightController() {
 
         BaseProduct product = DemoApplication.getProductInstance();
@@ -214,12 +212,12 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                             updateDroneLocation();
                         }
                     });
-/*            String a = "lat: "+droneLocationLat+" lng: "+droneLocationLng;
-            Toast.makeText(this,a,Toast.LENGTH_SHORT).show();*/
         }
     }
 
-    //更新飞机的位置信息
+    /**
+     * 更新飞机的位置信息
+     */
     private void updateDroneLocation(){
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         //显示飞机时，GPS坐标转换为火星坐标
@@ -243,12 +241,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         });
     }
 
-    //检查经纬度数值的合法性，返回布尔值
-    public static boolean checkGpsCoordination(double latitude, double longitude) {
-        return (latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180) && (latitude != 0f && longitude != 0f);
-    }
-
-    //按下location,视角切换到以飞机的位置为居中位置
+    /**
+     * 按下location,视角切换到以飞机的位置为居中位置
+     */
     private void cameraUpdate(){
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         pos = WG2GCJ(pos);
@@ -257,14 +252,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         aMap.moveCamera(cu);
     }
 
-    // 世界坐标转为火星坐标
-    private LatLng WG2GCJ(LatLng latLng){
-        CoordinateConverter converter = new CoordinateConverter();
-        converter.from(CoordinateConverter.CoordType.GPS);
-        converter.coord(latLng);
-        return converter.convert();
-    }
-
+    /**
+     *  设置航高和重叠度
+     */
     private void showScaleDialog(){
         View scaleSettings = getLayoutInflater().inflate(R.layout.dialog_scale, null);
 
@@ -321,7 +311,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 .show();
     }
 
-    //该方法显示设置对话框 高度、速度、任务完成后的行为、朝向？
+    /**
+     * 方法显示设置对话框 高度、速度、任务完成后的行为、朝向
+     */
     private void showSettingDialog(){
         View wayPointSettings = getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
 
@@ -399,7 +391,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 .show();
     }
 
-    //将对话框中所设定的飞行参数导入waypointMissionBuilder中
+    /**
+     * 将对话框中所设定的飞行参数导入waypointMissionBuilder中
+     */
     private void configWayPointMission(){
         //mFinishedAction mHeadingMode mSpeed mSpeed
         if (waypointMissionBuilder == null){
@@ -408,8 +402,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                     .autoFlightSpeed(mSpeed)
                     .maxFlightSpeed(maxSpeed)
                     .flightPathMode(WaypointMissionFlightPathMode.NORMAL);
-        }else
-        {
+        }else {
             waypointMissionBuilder.finishedAction(mFinishedAction)
                     .headingMode(mHeadingMode)
                     .autoFlightSpeed(mSpeed)
@@ -433,28 +426,27 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         }
     }
 
-    public WaypointMissionOperator getWaypointMissionOperator() {
-        if (instance == null) {
-            instance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
-        }
-        return instance;
-    }
-    //上传路径飞行任务到飞机
+    /**
+     * 上传路径飞行任务到飞机
+     */
     private void uploadWayPointMission(){
-
-        getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError error) {
-                if (error == null) {
-                    setResultToToast("Mission upload successfully!");
-                    getMApplication().setPointList(points);
-                    finish();
-                } else {
-                    setResultToToast("Mission upload failed, error: " + error.getDescription() + " retrying...");
-                    getWaypointMissionOperator().retryUploadMission(null);
+        if (mFinishedAction!=null&&mHeadingMode!=null){
+            getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    if (error == null) {
+                        setResultToToast("Mission upload successfully!");
+                        getMApplication().setPointList(points);
+                        finish();
+                    } else {
+                        setResultToToast("Mission upload failed, error: " + error.getDescription() + " retrying...");
+                        getWaypointMissionOperator().retryUploadMission(null);
+                    }
                 }
-            }
-        });
+            });
+        }else{
+            Toast.makeText(this, "请配置！", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -511,7 +503,6 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     @Override
     public void onMarkerDrag(Marker marker) {
         txt_map_tv.setText("正在拖动"+"\nmaker: "+marker.getPosition());
-        printPolygon();
     }
 
     @Override
@@ -520,55 +511,21 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         printPolygon();
     }
 
-
+    /**
+     *  画选定框的多边形
+     */
     private void printPolygon() {
         if (polygon != null) {
             polygon.remove();
         }
-        polygonOptions = new PolygonOptions();
-        for (Marker marker : mMarkers.values()) {
+        PolygonOptions polygonOptions = new PolygonOptions();
+        for (Marker marker : mMarkers) {
             polygonOptions.add(marker.getPosition());
         }
         polygonOptions.strokeWidth(15) // 多边形的边框
                 .strokeColor(Color.argb(90,0x00,0xE6,0x76)) // 边框颜色
                 .fillColor(Color.argb(50, 1, 1, 1));   // 多边形的填充色
         polygon = aMap.addPolygon(polygonOptions);
-    }
-
-    private void calculateLength(){
-        String data = "";
-        /*for (int i = 0; i < points.size()-1; i++) {
-            data += "距离" + (i+1) +" : "+ AMapUtils.calculateLineDistance(points.get(i),points.get(i+1))+"\n";
-        }
-        data += "距离" + points.size() +" : "+ AMapUtils.calculateLineDistance(points.get(points.size()-1),points.get(0))+"\n";
-        txt_data.setText(data);*/
-        for (int i = 0; i < points.size()-1; i++) {
-            distances.add( AMapUtils.calculateLineDistance(points.get(i),points.get(i+1)));
-        }
-        distances.add(AMapUtils.calculateLineDistance(points.get(points.size()-1),points.get(0)));
-        float max_distance = Collections.max(distances);
-        float min_distance = Collections.min(distances);
-        for (int i = 0; i < distances.size(); i++) {
-            data += "距离" + i +" : "+ distances.get(i)+"\n";
-        }
-
-
-        max_index = distances.indexOf(max_distance);
-        min_index = distances.indexOf(min_distance);
-
-        data += "最大值: " + max_distance + "\n";
-        data += "最小值: " + min_distance + "\n";
-        data += "最大的序号" + max_index + "\n";
-        data += "最小的序号" + min_index + "\n";
-
-
-        float [] result = new float[3];
-        Location.distanceBetween(30.5296077993,114.3553496015,30.5305827924,114.3553496015,result);
-        Location.distanceBetween(30.5296077993,114.3553496015,30.5305827924,114.3553496015,result);
-
-        data += "Google1: " + result[0];
-        Toast.makeText(this, ""+result[0], Toast.LENGTH_SHORT).show();
-        txt_map_tv.setText(data);
     }
 
     @Override
@@ -583,56 +540,69 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         }
     }
 
+    /**
+     * 画选定边界点
+     * @param point 边界点
+     */
     private void markWaypoint(LatLng point){
         markerOptions = new MarkerOptions();
         markerOptions.position(point);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.location));
         Marker marker = aMap.addMarker(markerOptions);
         marker.setDraggable(true);
-        mMarkers.put(mMarkers.size(), marker);
+        mMarkers.add(marker);
     }
 
+    /**
+     * 清除地图上所有覆盖物
+     */
     private void clear_map(){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                aMap.clear();
-            }
-        });
+        if (aMap != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    aMap.clear();
+                }
+            });
+        }else {
+            Toast.makeText(this, "地图加载错误", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    /**
+     *  根据路径点画线
+     * @param mapPointList
+     */
     private void drawLine(List<LatLng> mapPointList){
+        if (aMap != null) {
             polyline = aMap.addPolyline(new PolylineOptions().addAll(mapPointList).width(10).color(Color.YELLOW));
+        }else{
+            Toast.makeText(this, "地图加载错误", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private double []GCJ2WG(double lat, double lng){
-        double []coor = BDToGPS.gcj2WGSExactly(lat,lng);
-        return coor;
-    }
-
+    /**
+     *  根据边界点、航高、重叠度，规划路径
+     */
     private void routePlan(){
         points.clear();
         if (mMarkers.size()<3){
             Toast.makeText(this, "请增加区域顶点", Toast.LENGTH_SHORT).show();
         }else{
-            for (Marker marker: mMarkers.values()) {
+            for (Marker marker: mMarkers) {
                 points.add(marker.getPosition());
             }
             txt_map_tv.append("\n points: " + points.size());
-            /*myPoint p0 = new myPoint(points.get(0).latitude, points.get(0).longitude);
-            myPoint p1 = new myPoint(points.get(1).latitude, points.get(1).longitude);
-            myPoint p2 = new myPoint(points.get(2).latitude, points.get(2).longitude);
-            //myPoint p3 = new myPoint(points.get(3).latitude, points.get(3).longitude);*/
             myPoint[] list = new myPoint[points.size()];
             for (int i = 0; i < list.length; i++) {
                 list[i] = new myPoint(points.get(i).latitude, points.get(i).longitude);
             }
 
-            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
+           /* System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
             System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);
 
             System.out.println("altitude = " + altitude);
-            System.out.println("overlap = " + overlap);
+            System.out.println("overlap = " + overlap);*/
 
             //Log.d(TAG, "routePlan: altitude"+altitude);
             //Log.d(TAG, "routePlan: overlap"+overlap);
@@ -640,8 +610,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude,overlap));
             RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude,overlap));
 
-            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
-            System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);
+/*            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
+            System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);*/
 
             Toast.makeText(this, "dt_lat,dt_lng: "+ RoutePlan.dt_lat+"\t"+ RoutePlan.dt_lat, Toast.LENGTH_SHORT).show();
 
@@ -650,8 +620,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             waypointList.clear();
 
             // 添加起飞点
-            LatLng start = WG2GCJ(new LatLng(droneLocationLat,droneLocationLng));
-            myPoints.add(0,new myPoint(start.latitude,start.longitude));
+           /* LatLng start = WG2GCJ(new LatLng(droneLocationLat,droneLocationLng));
+            myPoints.add(0,new myPoint(start.latitude,start.longitude));*/
 
             for (myPoint point : myPoints) {
                 points.add(new LatLng(point.lat,point.lng));
@@ -681,6 +651,10 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         }
     }
 
+    /**
+     *  画出所有路径点
+     * @param points
+     */
     private void drawPoint(List<LatLng> points){
         for (LatLng point: points) {
             markerOptions = new MarkerOptions();
@@ -695,12 +669,37 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         return (MApplication)getApplicationContext();
     }
 
+    public WaypointMissionOperator getWaypointMissionOperator() {
+        if (instance == null) {
+            instance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
+        }
+        return instance;
+    }
+
     private void setResultToToast(final String string){
-        MapActivity.this.runOnUiThread(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(MapActivity.this, string, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // 世界坐标转为火星坐标
+    public LatLng WG2GCJ(LatLng latLng) {
+        CoordinateConverter converter = new CoordinateConverter();
+        converter.from(CoordinateConverter.CoordType.GPS);
+        converter.coord(latLng);
+        return converter.convert();
+    }
+    // 火星坐标转世界坐标
+    public double []GCJ2WG(double lat, double lng){
+        double []coor = BDToGPS.gcj2WGSExactly(lat,lng);
+        return coor;
+    }
+
+    // 检查经纬度数值的合法性，返回布尔值
+    public boolean checkGpsCoordination(double latitude, double longitude) {
+        return (latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180) && (latitude != 0f && longitude != 0f);
     }
 }

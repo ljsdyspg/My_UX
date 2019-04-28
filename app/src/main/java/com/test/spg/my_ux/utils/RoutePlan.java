@@ -47,7 +47,7 @@ public class RoutePlan {
         // 最终所有的坐标点存储
         List<myPoint> out_points = new ArrayList<>();
         // 添加起飞点
-        // out_points.add(p0);
+        out_points.add(p0);
 
         // 交点存储
         List<myPoint> nodes = new ArrayList<>();
@@ -172,12 +172,12 @@ public class RoutePlan {
     }
 
 
-
+/*
     public static void main(String[] args) { ;
 
-        /*myPoint p1 = new myPoint(30.5378740000,114.3672660000);
+        *//*myPoint p1 = new myPoint(30.5378740000,114.3672660000);
         myPoint p2 = new myPoint(30.5348570000,114.3621280000);
-        myPoint p3 = new myPoint(30.5322280000,114.3690810000);*/
+        myPoint p3 = new myPoint(30.5322280000,114.3690810000);*//*
         myPoint p1 = new myPoint(30.523683,114.355316);
         myPoint p2 = new myPoint(30.524055,114.367919);
         myPoint p3 = new myPoint(30.530233,114.359397);
@@ -198,5 +198,5 @@ public class RoutePlan {
                     "marker.setLabel(label);";
             System.out.println(js);
         }
-    }
+    }*/
 }

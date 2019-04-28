@@ -84,15 +84,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 注册广播接受器,接受连接状态变化的广播
         IntentFilter filter = new IntentFilter();
         filter.addAction(DemoApplication.FLAG_CONNECTION_CHANGE);
-        registerReceiver(mReceiver, filter);//注册广播接受器,接受连接状态变化的广播
+        registerReceiver(mReceiver, filter);
 
+        // 使用高德地图
         mapView = findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
 
 
         initMapView();
+        //
         initFlightController();
         init();
         initWaypoint();
@@ -108,54 +111,85 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onPause() {
         super.onPause();
-        clear();
     }
 
     private void initWaypoint() {
         mapPointList = getMApplication().getPointList();
-        LatLng temp ;
-        Toast.makeText(this, "被調用："+mapPointList.size()+"個！", Toast.LENGTH_SHORT).show();
+        LatLng temp;
+        Toast.makeText(this, "被調用：" + mapPointList.size() + "個！", Toast.LENGTH_SHORT).show();
         if (!mapPointList.isEmpty()) {
             for (int i = 0; i < mapPointList.size(); i++) {
                 temp = mapPointList.get(i);
-                markWaypoint(temp,i);
-                drawLine(temp);
+                markWaypoint(temp, i);
+                drawLine();
             }
         }
     }
-    private void markWaypoint(LatLng point, int pointNum){
+
+    /**
+     * 画出路径点标记
+     * @param point 当前点的坐标
+     * @param pointNum 当前点的序号
+     */
+    private void markWaypoint(LatLng point, int pointNum) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(point);
-        int pic_i = R.drawable.pic_1;
-        switch (pointNum){
-            case 1 :pic_i=R.drawable.pic_1;break;
-            case 2 :pic_i=R.drawable.pic_2;break;
-            case 3 :pic_i=R.drawable.pic_3;break;
-            case 4 :pic_i=R.drawable.pic_4;break;
-            case 5 :pic_i=R.drawable.pic_5;break;
-            case 6 :pic_i=R.drawable.pic_6;break;
-            case 7 :pic_i=R.drawable.pic_7;break;
-            case 8 :pic_i=R.drawable.pic_8;break;
-            case 9 :pic_i=R.drawable.pic_9;break;
-            default:pic_i=R.drawable.pic_1;break;
+        int pic_i;
+        switch ((pointNum + 1) / 9) {
+            case 1:
+                pic_i = R.drawable.pic_1;
+                break;
+            case 2:
+                pic_i = R.drawable.pic_2;
+                break;
+            case 3:
+                pic_i = R.drawable.pic_3;
+                break;
+            case 4:
+                pic_i = R.drawable.pic_4;
+                break;
+            case 5:
+                pic_i = R.drawable.pic_5;
+                break;
+            case 6:
+                pic_i = R.drawable.pic_6;
+                break;
+            case 7:
+                pic_i = R.drawable.pic_7;
+                break;
+            case 8:
+                pic_i = R.drawable.pic_8;
+                break;
+            case 9:
+                pic_i = R.drawable.pic_9;
+                break;
+            default:
+                pic_i = R.drawable.pic_1;
+                break;
         }
         markerOptions.icon(BitmapDescriptorFactory.fromResource(pic_i));
         Marker marker = aMap.addMarker(markerOptions);
         mMarkers.put(mMarkers.size(), marker);
     }
 
-    private void drawLine(LatLng point){
-        if (mapPointList.size()>1){
-            aMap.addPolyline(new PolylineOptions().
-                    addAll(mapPointList).width(10).color(Color.YELLOW));
+    /**
+     *  画出当前所有路径点按顺序的连线
+     */
+    private void drawLine() {
+        if (mapPointList.size() > 1) {
+            aMap.addPolyline(new PolylineOptions()
+                    .addAll(mapPointList)
+                    .width(10)
+                    .color(Color.YELLOW));
         }
     }
 
     /**
      * 初始化控件
      */
-    private void init(){
+    private void init() {
 
+        // 匹配界面上的控件
         parentView = findViewById(R.id.root_view);
         btn_locate = findViewById(R.id.btn_locate);
         btn_pause = findViewById(R.id.btn_pause);
@@ -166,6 +200,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_config = findViewById(R.id.btn_config);
         btn_flush = findViewById(R.id.btn_flush);
 
+        // 添加所有按钮的点击事件监听
         btn_locate.setOnClickListener(this);
         btn_pause.setOnClickListener(this);
         btn_reset.setOnClickListener(this);
@@ -175,16 +210,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         btn_config.setOnClickListener(this);
         btn_flush.setOnClickListener(this);
 
+        // 获取图传信息
         fpvWidget = findViewById(R.id.fpv_widget);
         fpvWidget.getVideoSource();
         fpvWidget.setSourceCameraNameVisibility(false); // 把FPV上的版本名字关掉
     }
 
+    /**
+     * 初始化高德地图
+     */
     private void initMapView() {
-
         if (aMap == null) {
             aMap = mapView.getMap();
-           // aMap.setOnMapClickListener(this);
+            // aMap.setOnMapClickListener(this);
         }
 
         LatLng WHU = new LatLng(30.5304782900, 114.3555023600);
@@ -198,16 +236,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btn_locate:
-                // 定位飞机的位置
-                /*droneLocationLat = 30.5353282352;
-                droneLocationLng = 114.3522811544;*/
+                // 定位飞机位置
                 initFlightController();
                 updateDroneLocation();
                 cameraUpdate();
-/*                String a = "lat: "+droneLocationLat+" lng: "+droneLocationLng;
-                Toast.makeText(this,a,Toast.LENGTH_SHORT).show();*/
                 break;
             case R.id.btn_start:
                 // 开始任务
@@ -230,7 +264,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.btn_reset:
                 // 重置
-                mapPointList = null;
+                mapPointList = new ArrayList<>();
                 clear();
                 Toast.makeText(this, "重置完成", Toast.LENGTH_SHORT).show();
                 break;
@@ -242,14 +276,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        switch (menuItem.getItemId()){
+                        switch (menuItem.getItemId()) {
                             default:
                                 break;
                             case R.id.action_1:
-                                startActivity(new Intent(MainActivity.this,ConfigActivity.class));
+                                startActivity(new Intent(MainActivity.this, ConfigActivity.class));
                                 break;
                             case R.id.action_2:
-                                startActivity(new Intent(MainActivity.this,MapActivity.class));
+                                startActivity(new Intent(MainActivity.this, MapActivity.class));
                                 break;
                         }
                         return false;
@@ -268,8 +302,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-
-    private void clear(){
+    /**
+     * 清除覆盖物
+     */
+    private void clear() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -280,8 +316,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         cameraUpdate();
     }
 
-    //更新飞机的位置信息
-    private void updateDroneLocation(){
+    // 更新飞机的位置信息
+    private void updateDroneLocation() {
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         //显示飞机时，GPS坐标转换为火星坐标
         pos = WG2GCJ(pos);
@@ -305,20 +341,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     // 世界坐标转为火星坐标
-    private LatLng WG2GCJ(LatLng latLng){
+    private LatLng WG2GCJ(LatLng latLng) {
         CoordinateConverter converter = new CoordinateConverter();
         converter.from(CoordinateConverter.CoordType.GPS);
         converter.coord(latLng);
         return converter.convert();
     }
 
-    //检查经纬度数值的合法性，返回布尔值
+    // 检查经纬度数值的合法性，返回布尔值
     public static boolean checkGpsCoordination(double latitude, double longitude) {
         return (latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180) && (latitude != 0f && longitude != 0f);
     }
 
-    //按下location,视角切换到以飞机的位置为居中位置
-    private void cameraUpdate(){
+    // 视角切换到以飞机的位置为居中位置
+    private void cameraUpdate() {
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         pos = WG2GCJ(pos);
         float zoomlevel = (float) 18.0;
@@ -326,29 +362,27 @@ public class MainActivity extends Activity implements View.OnClickListener {
         aMap.moveCamera(cu);
     }
 
+    /**
+     * 连接状态改变，更新连接
+     */
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
         @Override
         public void onReceive(Context context, Intent intent) {
-            onProductConnectionChange();
+            initFlightController();
         }
     };
 
-    private void onProductConnectionChange()
-    {
-        initFlightController();
-    }
 
-
+    /**
+     * 初始化飞机控制，并获取飞机位置
+     */
     private void initFlightController() {
-
         BaseProduct product = DemoApplication.getProductInstance();
         if (product != null && product.isConnected()) {
             if (product instanceof Aircraft) {
                 mFlightController = ((Aircraft) product).getFlightController();
             }
         }
-
         if (mFlightController != null) {
             mFlightController.setStateCallback(
                     new FlightControllerState.Callback() {
@@ -360,11 +394,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             updateDroneLocation();
                         }
                     });
-/*            String a = "lat: "+droneLocationLat+" lng: "+droneLocationLng;
-            Toast.makeText(this,a,Toast.LENGTH_SHORT).show();*/
         }
     }
 
+    /**
+     * 获取路径点模式操作
+     *
+     * @return 返回WaypointMissionOperator实例
+     */
     public WaypointMissionOperator getWaypointMissionOperator() {
         if (instance == null) {
             instance = DJISDKManager.getInstance().getMissionControl().getWaypointMissionOperator();
@@ -372,16 +409,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return instance;
     }
 
-    private void setResultToToast(final String string){
-        MainActivity.this.runOnUiThread(new Runnable() {
+    private void setResultToToast(final String string) {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(MainActivity.this, string, Toast.LENGTH_SHORT).show();
             }
         });
     }
-    //开始执行路径飞行任务
-    private void startWaypointMission(){
+
+    /**
+     * 开始执行路径飞行任务上
+     */
+    private void startWaypointMission() {
 
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -391,8 +431,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         });
 
     }
-    //停止执行路径飞行任务
-    private void stopWaypointMission(){
+
+    /**
+     * 停止执行路径飞行任务
+     */
+    private void stopWaypointMission() {
 
         getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -402,7 +445,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         });
 
     }
-    private void pauseWaypointMission(){
+
+    /**
+     * 暂停执行路径飞行任务
+     */
+    private void pauseWaypointMission() {
 
         getWaypointMissionOperator().pauseMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -412,7 +459,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         });
 
     }
-    private void resumeWaypointMission(){
+
+    /**
+     * 恢复执行路径飞行任务
+     */
+    private void resumeWaypointMission() {
 
         getWaypointMissionOperator().resumeMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -423,7 +474,46 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
-    private MApplication getMApplication(){
-        return (MApplication)getApplicationContext();
+    private MApplication getMApplication() {
+        return (MApplication) getApplicationContext();
     }
 }
+
+
+/*````````````````````````````````````````````````..-:-----..````````````````````````...............
+````````````````````````````````````````````````.:ossysyyysoo/:-.`````````````````..................
+``````````````````````````````````````````````.:osyyyhhhdhyyysss+-````````````````..................
+``````````````````````````````````````````````./yyhhhhhhhhhhhhyys:````````````````..................
+```````````````````````````````````````````````-yhhhhyysooshdhs+/-````````````````.```````..........
+```````````````````````````````````````````````.:sysyyysoosssy-```````````````````...``````.........
+````````````````````````````````````````````````./o//+//:///+/``````````````````........``..........
+````````````````````````````````````````````-/ohdmho:///////:.```````````````````````...............
+```````````````````````````````````````-///--odmmmmms/+ooo+sh::+:.`````````````````````.............
+`````````````````````````````````````-oddddds-+mmmmmmdo++ohmmh.sdhs+-```...````````````.............
+````````````````````````````````````:hmmmmmmmy:hNNmmmmmmmmNNmm:+mmmmdo.``....``````````.............
+```````````````````````````````````.hmmmmmmmmm+yNNNNmmmmmmmmmh:ommmmmmh.`...........................
+`````````````````````````````````.:ymmmmmmmmmmodNNNNNNNmmmmmm+omddmmmmms+-.``.......................
+```````````````````````````````./ydmmmmmmmNNmyyNNNNNNNNNNNNmssmNNNNmmmmmmdyo:--.....................
+`````````````````````````````.:ydmmmmNNNNNmdshmNNNNNNNNNNmhshmdydmNNNmmmmmmmdddy+-..................
+````````````````````````````-sdmmmmmNNNNmhssdNNNNNNNNNNNdssdho-..:+shdmmmNmmmmmmmdhso/:.............
+`````````````````````````.-odmmmmmNNNNmhoohmNNNNNNNNNNmy++/-.........-://+sydmmmmmmmmmdho-..........
+````````````````````````./hmmmmmmmmNmho+ymNNNNNNNNNNmdo-..```...............-:/ohdmmmmmmmdy+-.......
+``````````````````````.-sdmmmmmmmmmmhoymNNNNNNNNNNmhyo-````......................-/shdddmmmmd/``....
+`````````````````````./hmmmmmdhssyyyhdmmmmmmmmmmmdh/:-..`.......................-:///+/+osdssy.`....
+``````````````````..-sdmmmmho:oossyyyhhhhhhhhhhhhhhy+:.......................`./++++/:://+o/o/......
+``````````.........:ymmmmy/-.-sssyyyhhyyyyhhyhhhhhhhyy-`....................`.+++++/////++++o+-.....
+``````````..```..-+dmmdy/.```-yyyyyyyyyyyyyyyyyyyyyyyy:....................../oo+o+//+++o+++o+-`....
+-..```````.```..:smmms:..````.syyyyyyyyyyyyyyyyyyyyyss:....................../oooo+++ooooooos+......
+---..`````````./hmmmy-.....`.`+sssssyyyyyssssssssssssoo:......................ossoooossooooso:......
+-----...``....-odmmm+.`....`.`/oossssyyyyysyyyyysssssooo:....................../sssssssssso/........
+--------....-:::/+oo-........`/oooooosssys-+hhhyysssoooo+-......................-/+ooooo/:..........
+----------..:///:.-:.........`:ssoooooosy/`./hhhyysssoooo+-`........................................
+------------//::...-..........`/oooooooss:`.`/yyyyssoooooo+.........................................
+------------::--...............-oooooooos-`...-syyssooooooo/........................................
+-----------------...............+oooooooo:......oysssooooooo-.......................................
+-------------------.............:o++++ooo+......./sssooooooo+.......................................
+---------------------...........:oo+++++oo:`......-ossooooooo:......................................
+------------------------........:oo++++oooo......../ssssoooooo-.....................................
+--------------------------......:oooooooos/`........:sssssssss/.....................................
+-------:::::---:::::::------..../oosoooss+.........../yyyyyyss/.....................................
+.---:::::::::::::::::::::::::---ooosssyy/............-yyyyyyyo....................................*/

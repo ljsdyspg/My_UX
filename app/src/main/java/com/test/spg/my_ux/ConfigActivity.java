@@ -60,10 +60,13 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+/**
+ *  通过点击地图上的点添加路径点，实现按路径飞行
+ */
 public class ConfigActivity extends Activity implements View.OnClickListener, AMap.OnMapClickListener {
 
     private double droneLocationLat = 181, droneLocationLng = 181;//181超出180的范围，所以设置该初值
-    private Marker droneMarker = null;//表示飞机位置的标记对象
+    private Marker droneMarker;//表示飞机位置的标记对象
     private AMap aMap;
     private MapView mapView;
 
@@ -189,20 +192,6 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
             case R.id.btn_config_finish:
                 // 提交任务并返回到原界面
                 uploadWayPointMission();
-               /* // 跳转回主页面
-                Intent intent = new Intent();
-                //intent.putExtra("result","This is result message! ");
-                intent.putExtra("myWaypointMissionBuilder", (Parcelable) waypointMissionBuilder);
-                ConfigActivity.this.setResult(1, intent);
-                ConfigActivity.this.finish();*/
-     /*           try {
-                    Thread.sleep(1500);
-                    if (isUploadSuccess) {
-                        finish();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
                 break;
         }
     }
@@ -468,14 +457,9 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            onProductConnectionChange();
+            initFlightController();
         }
     };
-
-    private void onProductConnectionChange()
-    {
-        initFlightController();
-    }
 
     private void initFlightController() {
 
@@ -497,8 +481,6 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
                             updateDroneLocation();
                         }
                     });
-/*            String a = "lat: "+droneLocationLat+" lng: "+droneLocationLng;
-            Toast.makeText(this,a,Toast.LENGTH_SHORT).show();*/
         }
     }
 
@@ -542,13 +524,6 @@ public class ConfigActivity extends Activity implements View.OnClickListener, AM
                 }
             }
         });
-    }
-
-    /**
-     * 每一个拍照点进行拍照作业
-     */
-    private void takePhotoAtPoint(){
-
     }
 
     private MApplication getMApplication(){
