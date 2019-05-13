@@ -108,6 +108,11 @@ public class RoutePlan {
         System.out.println("out_points = " + out_points.size());
 
         out_points = rearrange((ArrayList<myPoint>) out_points);
+
+        // 如果路径点只有一条直线，路径点无效，返回null
+        if (isOneLine(out_points)) {
+            return null;
+        }
         return  out_points;
     }
 
@@ -169,6 +174,14 @@ public class RoutePlan {
             }
         }
         return outList;
+    }
+
+
+    public static boolean isOneLine(List<myPoint> out_points){
+        myPoint start = out_points.get(0);
+        myPoint end = out_points.get(out_points.size()-1);
+
+        return (end.lat - start.lat) > 100 * (end.lng - start.lng);
     }
 
 
