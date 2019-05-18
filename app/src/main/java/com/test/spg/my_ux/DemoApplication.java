@@ -53,30 +53,6 @@ public class DemoApplication extends Application {
         return mProduct;
     }
 
-    public static boolean isAircraftConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof Aircraft;
-    }
-
-    public static boolean isHandHeldConnected() {
-        return getProductInstance() != null && getProductInstance() instanceof HandHeld;
-    }
-
-    public static synchronized Camera getCameraInstance() {
-
-        if (getProductInstance() == null) return null;
-
-        Camera camera = null;
-
-        if (getProductInstance() instanceof Aircraft){
-            camera = ((Aircraft) getProductInstance()).getCamera();
-
-        } else if (getProductInstance() instanceof HandHeld) {
-            camera = ((HandHeld) getProductInstance()).getCamera();
-        }
-
-        return camera;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();

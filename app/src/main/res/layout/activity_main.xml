@@ -148,11 +148,6 @@
                     android:text="刷新"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"/>
-                <Button
-                    android:id="@+id/btn_test2"
-                    android:text="TEST2"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
