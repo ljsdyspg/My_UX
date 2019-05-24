@@ -22,12 +22,41 @@
             android:text="航高:"
             android:textSize="25dp" />
 
-        <SeekBar
-            android:id="@+id/skb_altitude"
-            android:layout_width="259dp"
-            android:layout_height="35dp" />
+        <EditText
+            android:id="@+id/edt_height"
+            android:inputType="number"
+            android:layout_width="100dp"
+            android:layout_height="40dp" />
+
         <TextView
             android:id="@+id/txt_altitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill"
+            android:textSize="20dp" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:textSize="25dp"
+            android:text="航向重叠度:"/>
+
+        <SeekBar
+            android:id="@+id/skb_lngOverlap"
+            android:layout_width="230dp"
+            android:layout_height="35dp" />
+        <TextView
+            android:id="@+id/txt_lngOverlap"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:textSize="25dp" />
@@ -44,17 +73,18 @@
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:textSize="25dp"
-            android:text="重叠度:"/>
+            android:text="旁向重叠度:"/>
 
         <SeekBar
-            android:id="@+id/skb_overlap"
-            android:layout_width="259dp"
+            android:id="@+id/skb_sideOverlap"
+            android:layout_width="230dp"
             android:layout_height="35dp" />
         <TextView
-            android:id="@+id/txt_overlap"
+            android:id="@+id/txt_sideOverlap"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:textSize="25dp" />
+
     </LinearLayout>
 
 </LinearLayout>

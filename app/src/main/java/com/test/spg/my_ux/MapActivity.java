@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -108,7 +109,10 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     private List<Marker> pointMarker_list = new ArrayList<>();
     // 线
     private Polyline polyline;
-    private double overlap = 0;
+    // 航向重叠度
+    private double lngOverlap = 0;
+    // 旁向重叠度
+    private double sideOverlap = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -267,16 +271,17 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
         View scaleSettings = getLayoutInflater().inflate(R.layout.dialog_scale, null);
 
         final TextView txt_height = scaleSettings.findViewById(R.id.txt_altitude);
-        final SeekBar skb_altitude = scaleSettings.findViewById(R.id.skb_altitude);
-        final TextView txt_overlap = scaleSettings.findViewById(R.id.txt_overlap);
-        final SeekBar skb_overlap = scaleSettings.findViewById(R.id.skb_overlap);
+        final EditText edt_height = scaleSettings.findViewById(R.id.edt_height);
+        final TextView txt_lngOverlap = scaleSettings.findViewById(R.id.txt_lngOverlap);
+        final TextView txt_sideOverlap = scaleSettings.findViewById(R.id.txt_sideOverlap);
+        final SeekBar skb_lngOverlap = scaleSettings.findViewById(R.id.skb_lngOverlap);
+        final SeekBar skb_sideOverlap = scaleSettings.findViewById(R.id.skb_sideOverlap);
 
 
-        skb_altitude.setMax(3000);
-        skb_altitude.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        skb_lngOverlap.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txt_height.setText((float) i / 10 + " 米");
+                txt_lngOverlap.setText(i + "%");
             }
 
             @Override
@@ -289,10 +294,11 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
             }
         });
-        skb_overlap.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+        skb_sideOverlap.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txt_overlap.setText(i + "%");
+                txt_sideOverlap.setText(i + "%");
             }
 
             @Override
@@ -311,8 +317,9 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 .setView(scaleSettings)
                 .setPositiveButton("Finish", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        altitude = (float) skb_altitude.getProgress() / 10;
-                        overlap = skb_overlap.getProgress() / 100;
+                        altitude = Float.valueOf(edt_height.getText().toString());
+                        lngOverlap = skb_lngOverlap.getProgress() / 100;
+                        sideOverlap = skb_sideOverlap.getProgress() / 100;
                     }
                 })
                 .create()
@@ -619,13 +626,13 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);
 
             System.out.println("altitude = " + altitude);
-            System.out.println("overlap = " + overlap);*/
+            System.out.println("lngOverlap = " + lngOverlap);*/
 
             //Log.d(TAG, "routePlan: altitude"+altitude);
-            //Log.d(TAG, "routePlan: overlap"+overlap);
+            //Log.d(TAG, "routePlan: lngOverlap"+lngOverlap);
 
-            RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude, overlap));
-            RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude, overlap));
+            RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude, lngOverlap));
+            RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude, sideOverlap));
 
 /*            System.out.println("RoutePlan.dt_lat = " + RoutePlan.dt_lat);
             System.out.println("RoutePlan.dt_lng = " + RoutePlan.dt_lng);*/
@@ -723,7 +730,6 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
     }
 
 
-
     /**
      * 异步处理计算路径规划
      */
@@ -782,8 +788,8 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
 
             if (list != null) {
                 // 经纬度差
-                RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude, overlap));
-                RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude, overlap));
+                RoutePlan.dt_lng = GS.cal_DeltaLng(list[0].lat, list[0].lng, GS.cal_Length(altitude, lngOverlap));
+                RoutePlan.dt_lat = GS.cal_DeltaLat(list[0].lat, list[0].lng, GS.cal_Width(altitude, lngOverlap));
 
                 publishProgress(30); // 更新进度条进度
 
@@ -919,11 +925,12 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
                 Timer timer = new Timer();
                 timer.schedule(new TimerTask() {
                     int time = 0;
+
                     @Override
                     public void run() {
                         publishProgress(time += 1);
                     }
-                },0,40);
+                }, 0, 40);
 
 
                 getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
@@ -945,6 +952,7 @@ public class MapActivity extends Activity implements AMap.OnMapClickListener, Vi
             }
             return true;
         }
+
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);

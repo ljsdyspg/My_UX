@@ -8,7 +8,7 @@
     tools:context=".MapActivity">
 
     <com.amap.api.maps2d.MapView
-        android:id ="@+id/mapview_map"
+        android:id="@+id/mapview_map"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="8"></com.amap.api.maps2d.MapView>
